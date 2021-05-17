@@ -795,6 +795,7 @@
 			padding: 0;
 			font-size: 0.9em;
 			list-style: none;
+			text-transform: none;
 		}
 
 			#footer .copyright li {
