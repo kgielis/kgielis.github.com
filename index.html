@@ -126,10 +126,13 @@
 	async function fetchData() {
 		const chartSection = document.getElementById('chart-section');
 		try {
-			const response = await fetch('https://dashboard.safe.ai/api/models');
+			// Using AllOrigins proxy to bypass CORS restrictions
+			const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://dashboard.safe.ai/api/models')}`;
+			const response = await fetch(proxyUrl);
 			if (!response.ok) throw new Error('API fetch failed');
 
-			const data = await response.json();
+			const wrapper = await response.json();
+			const data = JSON.parse(wrapper.contents);
 
 			// Process data
 			allModels = data.map(model => ({
