@@ -88,6 +88,9 @@
 			</div>
 
 			<div id="chart-container"></div>
+			<!-- Mobile List View -->
+			<div id="mobile-list-container" class="mobile-list-view"></div>
+
 			<div
 				style="width: 100%; text-align: left; font-size: 12px; color: var(--text-secondary); margin-top: 10px;">
 				Source: <a href="https://agi.safe.ai/" target="_blank"
@@ -147,7 +150,7 @@
 
 			if (allModels.length > 0) {
 				chartSection.style.display = 'block';
-				renderChart();
+				renderVisualizations();
 			} else {
 				chartSection.style.display = 'none';
 			}
@@ -211,12 +214,55 @@
 		return { x: curveX, y: curveY };
 	}
 
-	function renderChart() {
+	function renderVisualizations() {
 		const activeData = allModels.filter(m => {
 			if (currentSize === 'standard') return m.size === 'standard';
 			return m.size === 'mini' || m.size === 'nano';
 		});
 
+		renderChart(activeData);
+		renderMobileList(activeData);
+	}
+
+	function renderMobileList(data) {
+		const container = document.getElementById('mobile-list-container');
+		container.innerHTML = '';
+
+		// Sort by accuracy descending or date descending? Usually top performers first is good.
+		// Let's sort by date descending (newest first) or accuracy. The graph is effectively time based.
+		// Let's sort by Date Descending to show latest progress first.
+		const sortedData = [...data].sort((a, b) => b.accuracy - a.accuracy); // Actually highest accuracy first might be more interesting "Leaderboard" style.
+
+		if (sortedData.length === 0) {
+			container.innerHTML = '<p style="text-align:center; color: var(--text-secondary);">No models found.</p>';
+			return;
+		}
+
+		sortedData.forEach(model => {
+			const color = PROVIDER_COLORS[model.provider] || PROVIDER_COLORS['default'];
+
+			const item = document.createElement('div');
+			item.className = 'mobile-list-item';
+			item.style.borderLeft = `4px solid ${color}`;
+
+			item.innerHTML = `
+				<div class="model-info">
+					<div class="model-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+						<span style="font-weight: 600; color: var(--text-primary);">${model.name}</span>
+						<span style="font-size: 0.9em; font-weight: 700; color: ${color};">${model.accuracy}%</span>
+					</div>
+					<div class="model-meta" style="font-size: 0.8em; color: var(--text-secondary); display: flex; justify-content: space-between;">
+						<span>${model.provider.toUpperCase()}</span>
+						<span>${model.date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
+					</div>
+				</div>
+			`;
+
+			container.appendChild(item);
+		});
+	}
+
+	function renderChart(activeData) {
 		if (activeData.length === 0) {
 			Plotly.newPlot('chart-container', [], {});
 			return;
@@ -329,7 +375,7 @@
 	document.querySelectorAll('input[name="modelSize"]').forEach(radio => {
 		radio.addEventListener('change', (e) => {
 			currentSize = e.target.value;
-			renderChart();
+			renderVisualizations();
 		});
 	});
 
