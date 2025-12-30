@@ -231,7 +231,7 @@
 		// Sort by accuracy descending or date descending? Usually top performers first is good.
 		// Let's sort by date descending (newest first) or accuracy. The graph is effectively time based.
 		// Let's sort by Date Descending to show latest progress first.
-		const sortedData = [...data].sort((a, b) => b.accuracy - a.accuracy); // Actually highest accuracy first might be more interesting "Leaderboard" style.
+		const sortedData = [...data].sort((a, b) => b.accuracy - a.accuracy).slice(0, 5);
 
 		if (sortedData.length === 0) {
 			container.innerHTML = '<p style="text-align:center; color: var(--text-secondary);">No models found.</p>';
@@ -381,7 +381,10 @@
 
 	// Handle resize
 	window.addEventListener('resize', () => {
-		Plotly.Plots.resize('chart-container');
+		const chartContainer = document.getElementById('chart-container');
+		if (chartContainer && chartContainer.offsetParent !== null) {
+			Plotly.Plots.resize('chart-container');
+		}
 	});
 
 	// Initialize
